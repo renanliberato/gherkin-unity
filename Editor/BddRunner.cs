@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using NUnit.Framework;
 
 namespace GherkinUnity
 {
@@ -26,6 +25,18 @@ namespace GherkinUnity
     }
 
     /// <summary>
+    /// Thrown when a scenario cannot be executed (missing step definition, argument binding
+    /// failure) or when a step's assertion fails. Test runners treat it like any other failure.
+    /// </summary>
+    public sealed class BddStepException : Exception
+    {
+        public BddStepException(string message)
+            : base(message)
+        {
+        }
+    }
+
+    /// <summary>
     /// Executes a parsed scenario against step-definition methods on a steps object: matches each
     /// step's keyword + regex pattern, converts captured groups to method arguments, runs
     /// Before/AfterScenario hooks, and fails with the failing step's file line for readability.
@@ -44,7 +55,7 @@ namespace GherkinUnity
             }
             catch (Exception e)
             {
-                throw new AssertionException($"BeforeScenario hook failed: {e.Message}");
+                throw new BddStepException($"BeforeScenario hook failed: {e.Message}");
             }
 
             for (int i = 0; i < scenario.Steps.Count; i++)
@@ -53,8 +64,9 @@ namespace GherkinUnity
                 MethodInfo definition = FindStepDefinition(steps.GetType(), step);
                 if (definition == null)
                 {
-                    Assert.Fail($"No step definition matches step {i + 1}: \"{step}\" (line {step.LineNumber}). " +
-                                "Add a [Given]/[When]/[Then] method with a matching regex in the steps class.");
+                    throw new BddStepException(
+                        $"No step definition matches step {i + 1}: \"{step}\" (line {step.LineNumber}). " +
+                        "Add a [Given]/[When]/[Then] method with a matching regex in the steps class.");
                 }
 
                 object[] args;
@@ -64,9 +76,9 @@ namespace GherkinUnity
                 }
                 catch (Exception e)
                 {
-                    Assert.Fail($"Step {i + 1}: \"{step}\" (line {step.LineNumber}): cannot bind arguments to " +
-                                $"{definition.Name}: {e.Message}");
-                    throw;
+                    throw new BddStepException(
+                        $"Step {i + 1}: \"{step}\" (line {step.LineNumber}): cannot bind arguments to " +
+                        $"{definition.Name}: {e.Message}");
                 }
 
                 try
@@ -75,12 +87,12 @@ namespace GherkinUnity
                 }
                 catch (TargetInvocationException e)
                 {
-                    throw new AssertionException(
+                    throw new BddStepException(
                         $"Step {i + 1}: \"{step}\" (line {step.LineNumber}) failed: {e.InnerException?.Message ?? e.Message}");
                 }
                 catch (Exception e)
                 {
-                    throw new AssertionException(
+                    throw new BddStepException(
                         $"Step {i + 1}: \"{step}\" (line {step.LineNumber}) failed: {e.Message}");
                 }
             }
@@ -91,7 +103,7 @@ namespace GherkinUnity
             }
             catch (Exception e)
             {
-                throw new AssertionException($"AfterScenario hook failed: {e.Message}");
+                throw new BddStepException($"AfterScenario hook failed: {e.Message}");
             }
         }
 

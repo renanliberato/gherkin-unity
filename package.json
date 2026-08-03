@@ -1,6 +1,6 @@
 {
     "name": "com.renanliberato.gherkin-unity",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "displayName": "Gherkin BDD for Unity",
     "description": "Minimal Gherkin (Cucumber-style) BDD test runner for Unity Edit Mode tests. Parses real .feature files and executes scenarios through regex step definitions on top of the Unity Test Framework, with no external dependencies.",
     "unity": "6000.0",

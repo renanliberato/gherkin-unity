@@ -20,7 +20,7 @@ SpecFlow generates code-behind at MSBuild time and binds to a specific NUnit ver
 Add the package to your project's `Packages/manifest.json`:
 
 ```json
-"com.renanliberato.gherkin-unity": "https://github.com/renanliberato/gherkin-unity.git#v0.1.0"
+"com.renanliberato.gherkin-unity": "https://github.com/renanliberato/gherkin-unity.git#v0.2.0"
 ```
 
 The package ships an Editor-only assembly (`GherkinUnity.Editor`) that references the NUnit test assemblies, so it is only usable from Edit Mode test assemblies. Reference it from your test `.asmdef`:
